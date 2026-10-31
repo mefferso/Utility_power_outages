@@ -1,5 +1,7 @@
 {
   "schema_version": 1,
-  "months": [],
-  "latest_collection": null
+  "months": [
+    "2026-10"
+  ],
+  "latest_collection": "2026-10-31T01:12:25Z"
 }
