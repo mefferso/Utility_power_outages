@@ -26,6 +26,8 @@ function filter() {
  render();
 }
 function render() {
+ window.outageFiltered=state.filtered;
+ if(typeof paintOutageMap==="function")paintOutageMap(state.filtered);
  $("count").textContent=state.filtered.length.toLocaleString();
  $("pairs").textContent=new Set(state.filtered.map(r=>r.fips+"|"+r.utility)).size.toLocaleString();
  const tbody=$("rows");tbody.replaceChildren();
