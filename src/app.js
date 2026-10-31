@@ -1,6 +1,6 @@
 "use strict";
 const $ = id => document.getElementById(id);
-const state = {manifest:null, snapshots:[], filtered:[]};
+const state = {manifest:null, snapshots:[], filtered:[], latestSnapshot:null};
 const fields = ["observed_at","source_as_of","county","state","utility","customers_out","cause","crew_status","started_at","lat","lon","source_url"];
 function textCell(row, value) {const td=document.createElement("td"); td.textContent=value==null?"—":String(value);row.appendChild(td);}
 function csvCell(value) {return '"' + String(value??"").replaceAll('"','""') + '"';}
@@ -26,6 +26,8 @@ function filter() {
  render();
 }
 function render() {
+ window.outageFiltered=state.filtered;
+ if(typeof paintOutageMap==="function")paintOutageMap(state.filtered);
  $("count").textContent=state.filtered.length.toLocaleString();
  $("pairs").textContent=new Set(state.filtered.map(r=>r.fips+"|"+r.utility)).size.toLocaleString();
  const tbody=$("rows");tbody.replaceChildren();
@@ -59,7 +61,10 @@ async function load() {
  for(const month of months){
   try {
    const res=await fetch("data/"+month+".json");if(!res.ok)throw Error("HTTP "+res.status);
-   const body=await res.json();for(const snapshot of body.snapshots||[])state.snapshots.push(...(snapshot.incidents||[]));
+   const body=await res.json();for(const snapshot of body.snapshots||[]){
+    state.snapshots.push(...(snapshot.incidents||[]));
+    if(!state.latestSnapshot || snapshot.collected_at>state.latestSnapshot.collected_at)state.latestSnapshot=snapshot;
+   }
   }catch(e){failed.push(month+": "+e.message);}
  }
  const distinct=(field)=>[...new Set(state.snapshots.map(r=>r[field]).filter(v=>v!=null&&v!==""))];
@@ -67,6 +72,22 @@ async function load() {
  for(const [fips,label] of counties)$("county").add(new Option(label,fips));
  options("utility",distinct("utility"));options("cause",distinct("cause"));
  filter();
+ const latest=state.latestSnapshot;
+ if(latest) {
+  $("last-collection").textContent=latest.collected_at;
+  const statuses=latest.coverage||[];
+  const good=statuses.filter(c=>c.status==="ok").length;
+  const delayed=statuses.filter(c=>c.status==="delayed").length;
+  const bad=statuses.filter(c=>c.status==="error").length;
+  $("coverage").textContent=good+" current, "+delayed+" delayed, "+bad+" failed of "+statuses.length;
+  const age=(Date.now()-Date.parse(latest.collected_at))/60000;
+  $("freshness").textContent=Number.isFinite(age)?(age>120?"Stale — "+Math.round(age)+" min old":"Recent — "+Math.round(age)+" min old"):"Unknown";
+  const detail=$("county-health"); detail.replaceChildren();
+  statuses.forEach(c=>{const p=document.createElement("p");p.textContent=c.fips+": "+c.status+" • "+(c.incident_count===null?"unknown":c.incident_count)+" incidents"+(c.error?" • "+c.error:"");detail.appendChild(p);});
+ } else {
+  $("last-collection").textContent="No collections archived";
+  $("coverage").textContent="Unknown";$("freshness").textContent="Unavailable";
+ }
  if(failed.length)$("status").textContent+=" WARNING: Unavailable archives: "+failed.join(", ");
  if(months.length===0)$("status").textContent="No archive yet. Enable the scheduled collector and run it once to begin.";
  }catch(error){$("status").textContent="Archive unavailable: "+error.message;}
