@@ -1,76 +1,75 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-31T01:23:13.536208Z",
+  "generated_at": "2026-10-31T01:23:41.592073Z",
   "description": "County-level historical monthly outage summaries, not geolocated incidents",
   "years_requested": [
-    2025,
     2026
   ],
   "counties": [
     {
       "fips": "22005",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "22033",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "22051",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "22063",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "22071",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "22087",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "22103",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "22105",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "22091",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "28045",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "28047",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "28059",
       "status": "ok",
-      "records": 14
+      "records": 2
     },
     {
       "fips": "28109",
       "status": "ok",
-      "records": 14
+      "records": 2
     }
   ],
   "records": [
