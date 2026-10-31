@@ -1,0 +1,21 @@
+name: Audit Entergy public outage fields
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/audit_entergy_fields.py'
+      - '.github/workflows/audit-entergy.yml'
+permissions:
+  contents: read
+jobs:
+  field-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect field completeness without saving private details
+        run: python scripts/audit_entergy_fields.py
