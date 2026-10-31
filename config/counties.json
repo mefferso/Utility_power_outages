@@ -1,0 +1,67 @@
+[
+  {
+    "fips": "22005",
+    "name": "Ascension",
+    "state": "LA"
+  },
+  {
+    "fips": "22033",
+    "name": "East Baton Rouge",
+    "state": "LA"
+  },
+  {
+    "fips": "22051",
+    "name": "Jefferson",
+    "state": "LA"
+  },
+  {
+    "fips": "22063",
+    "name": "Livingston",
+    "state": "LA"
+  },
+  {
+    "fips": "22071",
+    "name": "Orleans",
+    "state": "LA"
+  },
+  {
+    "fips": "22087",
+    "name": "St. Bernard",
+    "state": "LA"
+  },
+  {
+    "fips": "22103",
+    "name": "St. Tammany",
+    "state": "LA"
+  },
+  {
+    "fips": "22105",
+    "name": "Tangipahoa",
+    "state": "LA"
+  },
+  {
+    "fips": "22091",
+    "name": "St. Helena",
+    "state": "LA"
+  },
+  {
+    "fips": "28045",
+    "name": "Hancock",
+    "state": "MS"
+  },
+  {
+    "fips": "28047",
+    "name": "Harrison",
+    "state": "MS"
+  },
+  {
+    "fips": "28059",
+    "name": "Jackson",
+    "state": "MS"
+  },
+  {
+    "fips": "28109",
+    "name": "Pearl River",
+    "state": "MS"
+  }
+]
