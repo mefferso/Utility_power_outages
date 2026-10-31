@@ -5,6 +5,7 @@ identifiers or precise coordinates. Read-only, no persistent record changes.
 """
 import collections
 import json
+import re
 import urllib.parse
 import urllib.request
 
@@ -32,6 +33,10 @@ def audit(state, features, limited):
         present = [v for v in vals if v is not None and str(v).strip()]
         print(f"  {field}: {len(present)}/{len(rows)} populated")
         # Only report low-risk controlled labels. No excerpts from free-text fields.
+        if field in ("comments", "title"):
+            for label,pattern in {"tree":"tree|limb|branch|vegetation","pole":"pole|crossarm","line":"downed line|wire down|line down","wind":"wind|storm|thunderstorm","lightning":"lightning","estimated":"estimated|restoration|crew|repair","generic":"outage|customer|power"}.items():
+                print(f"    {label}: {sum(bool(re.search(pattern, str(v), re.I)) for v in present)}")
+            print("    length bands:", dict(collections.Counter("short" if len(str(v)) < 40 else "medium" if len(str(v)) < 160 else "long" for v in present)))
         if field == "eventtype":
             print("  eventtype labels (redacted if long):", [(str(k)[:36], n) for k,n in collections.Counter(map(str,present)).most_common(10)])
 
