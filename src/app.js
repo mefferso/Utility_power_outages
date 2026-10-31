@@ -67,6 +67,23 @@ async function load() {
    }
   }catch(e){failed.push(month+": "+e.message);}
  }
+ // Load separately archived direct Entergy incidents; failure is visible, not silently zero.
+ try {
+  const er=await fetch("data/entergy/manifest.json",{cache:"no-store"});
+  if(!er.ok)throw Error("manifest HTTP "+er.status);
+  const em=await er.json();
+  let directErrors=[];
+  for(const month of em.months||[]){
+   try {
+    const response=await fetch("data/entergy/"+month+".json",{cache:"no-store"});
+    if(!response.ok)throw Error("HTTP "+response.status);
+    const body=await response.json();
+    for(const snap of body.snapshots||[])state.snapshots.push(...(snap.incidents||[]));
+   }catch(e){directErrors.push(month+": "+e.message);}
+  }
+  const eStatus=document.getElementById("entergy-status");
+  if(eStatus)eStatus.textContent=(em.months||[]).length?"Entergy direct archive: "+(em.months||[]).length+" months. "+(directErrors.length?"Failed: "+directErrors.join(", "):""):"Entergy direct archive not collected yet; run the Entergy workflow.";
+ }catch(e){const node=document.getElementById("entergy-status");if(node)node.textContent="Entergy direct source unavailable: "+e.message;}
  const distinct=(field)=>[...new Set(state.snapshots.map(r=>r[field]).filter(v=>v!=null&&v!==""))];
  const counties=[...new Map(state.snapshots.map(r=>[r.fips,[r.fips,r.county+", "+r.state]])).values()].sort((a,b)=>a[1].localeCompare(b[1]));
  for(const [fips,label] of counties)$("county").add(new Option(label,fips));
