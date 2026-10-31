@@ -1,0 +1,39 @@
+name: Refresh 2026 historical county summaries
+on:
+  workflow_dispatch:
+    inputs:
+      include_2025:
+        description: "Also retrieve 2025 when upstream history is available"
+        required: false
+        default: false
+        type: boolean
+permissions:
+  contents: write
+concurrency:
+  group: utility-archive
+  cancel-in-progress: false
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch historical summaries
+        env:
+          MASSOUTAGE_API_KEY: ${{ secrets.MASSOUTAGE_API_KEY }}
+          INCLUDE_2025: ${{ inputs.include_2025 }}
+        run: python scripts/backfill_history.py
+      - name: Commit validated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/history.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh historical outage county summaries"
+            git push
+          fi
