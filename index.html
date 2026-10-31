@@ -1,6 +1,8 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>LIX Utility Outage Research Archive</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color-scheme:dark;background:#0d1725;color:#eaf1f8}*{box-sizing:border-box}
 body{max-width:1450px;margin:0 auto;padding:25px}header{border-bottom:1px solid #30465d;padding-bottom:14px}h1{margin:0;font-size:1.7rem}h2{font-size:1.12rem}.sub,.hint{color:#aabed0}.warning{background:#352b16;border:1px solid #a37b32;padding:13px;border-radius:8px;margin:18px 0}
@@ -9,6 +11,22 @@ label{display:flex;flex-direction:column;font-size:.88rem;gap:5px}input,select,b
 button{background:#164e7a;cursor:pointer}button:hover{background:#206b9e}.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0}
 .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:15px 0}.card{background:#17263a;border-radius:9px;padding:15px}.number{font-size:1.6rem;font-weight:750}
 .tablewrap{overflow:auto;max-height:65vh;border:1px solid #31465b;border-radius:9px}table{border-collapse:collapse;width:100%;font-size:.84rem}th,td{border-bottom:1px solid #34465b;text-align:left;padding:10px;white-space:nowrap}th{position:sticky;top:0;background:#24364a}tr:hover{background:#182b40}a{color:#8fc9ff}footer{margin-top:18px;font-size:.8rem;color:#b2c2d0}
+/* Essential Leaflet positioning fallback: prevents map tiles escaping the map if external CSS fails. */
+#outage-map{position:relative!important;overflow:hidden!important;isolation:isolate;width:100%;height:480px;contain:layout paint}
+#outage-map .leaflet-pane,#outage-map .leaflet-tile-container,#outage-map .leaflet-tile,
+#outage-map .leaflet-marker-icon,#outage-map .leaflet-marker-shadow,#outage-map .leaflet-overlay-pane svg,
+#outage-map .leaflet-pane>svg,#outage-map .leaflet-pane>canvas{position:absolute;left:0;top:0}
+#outage-map .leaflet-map-pane,#outage-map .leaflet-tile-pane,#outage-map .leaflet-overlay-pane,
+#outage-map .leaflet-shadow-pane,#outage-map .leaflet-marker-pane,#outage-map .leaflet-tooltip-pane,
+#outage-map .leaflet-popup-pane{position:absolute;left:0;top:0}
+#outage-map .leaflet-tile{max-width:none!important;max-height:none!important}
+#outage-map .leaflet-control-container .leaflet-top,#outage-map .leaflet-control-container .leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}
+#outage-map .leaflet-control-container .leaflet-top{top:0}#outage-map .leaflet-control-container .leaflet-bottom{bottom:0}
+#outage-map .leaflet-control-container .leaflet-left{left:0}#outage-map .leaflet-control-container .leaflet-right{right:0}
+#outage-map .leaflet-control{position:relative;z-index:800;pointer-events:auto}
+#outage-map .leaflet-control-attribution{background:rgba(255,255,255,.82);color:#222;padding:2px 5px}
+#outage-map .leaflet-control-attribution a{color:#136299}
+#outage-map .leaflet-container{background:#17263a}
 </style></head><body>
 <header><h1>⚡ Utility Power Outages — LIX Research Archive</h1><p class="sub">Historical outage snapshots • damage clues • Storm Data research support</p></header>
 <div class="warning"><strong>Research only — NOT an operational warning or verified LSR feed.</strong> Utility outages can be unrelated to weather. Approximate incident coordinates, reported causes, and start times require independent confirmation. Unavailable sources are not zero outages.</div>
@@ -27,4 +45,4 @@ button{background:#164e7a;cursor:pointer}button:hover{background:#206b9e}.action
 <h2>Data collection health</h2><div class="cards"><div class="card"><div class="hint">Last successful collection</div><div id="last-collection">—</div></div><div class="card"><div class="hint">Last collection coverage</div><div id="coverage">—</div></div><div class="card"><div class="hint">Status</div><div id="freshness">—</div></div></div><details><summary>County feed details</summary><div id="county-health" class="hint"></div></details><h2>Outage observation map</h2><p class="hint">Public incident positions may be generalized and are not customer addresses. Yellow markers have a potentially weather-related reported cause; blue markers have other or unspecified causes.</p><label style="display:inline-flex;flex-direction:row;align-items:center;gap:8px"><input type="checkbox" id="map-latest" checked> Show only the latest matching collection time</label><div id="outage-map" style="height:480px;margin:12px 0;border:1px solid #506783;border-radius:8px;background:#17263a"></div><p id="map-status" class="hint">Loading map…</p><h2>Archived individual incident observations</h2><p class="hint">Each row is a snapshot, not necessarily a unique event. Repeated outages over time will appear multiple times. This is intentional for reconstruction and provenance.</p>
 <div class="tablewrap"><table><thead><tr><th>Observed UTC</th><th>Source time UTC</th><th>Parish / County</th><th>Utility</th><th>Customers</th><th>Reported cause</th><th>Crew</th><th>Estimated start</th><th>Location</th><th>Source</th></tr></thead><tbody id="rows"></tbody></table></div>
 <footer>Public data attribution: <a href="https://massoutage.com">MassOutage</a> (CC BY 4.0). Collected timestamps mark observation time, not necessarily outage onset. Historical coverage begins when collection is successfully enabled. No individual incident backfill is implied.</footer>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyo1Pjbe1ZbL0hE=" crossorigin=""><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script src="src/map.js"></script><script src="src/app.js"></script></body></html>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script><script src="src/map.js"></script><script src="src/app.js"></script></body></html>
